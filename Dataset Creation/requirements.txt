@@ -1,0 +1,4 @@
+librosa
+spleeter
+mirdata
+smart_open
