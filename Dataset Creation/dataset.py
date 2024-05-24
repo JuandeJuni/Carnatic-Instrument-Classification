@@ -37,3 +37,6 @@ def get_random_song():
     """
     song = saraga.choice_track()
     return song
+
+def laia():
+    return 
