@@ -4,8 +4,9 @@ import librosa
 import numpy as np
 import matplotlib.pyplot as plt
 from IPython.display import Audio
+from math import ceil
 
-def initDataset(path):
+def init_dataset(path):
     """
     Initialize the dataset from the path
     """
@@ -78,7 +79,7 @@ def load_mridangam_audio(track_id):
 
     audio_array_right, sr = librosa.load(audio_path_right, sr=44100,mono=False)    
     audio_array_left, sr = librosa.load(audio_path_left, sr=44100,mono=False)
-    audio_array = librosa.to_mono(np.array([audio_path_left,audio_path_right]))
+    audio_array = librosa.to_mono(np.array([audio_array_left,audio_array_right]))
     return audio_array
 
 def plot_waveform(audio_array,amplitude="normal"):
@@ -101,5 +102,62 @@ def play_audio(audio_array):
     """
     Generate audio player for <audio_array> using Ipython library
     """
-    display(Audio(audio_array, rate=44100))
+    Audio(audio_array, rate=44100)
 
+def detect_silence(audio_array,th=20):
+    """
+    Return array of 0 and 1 (is silent/is not silent) for input <audio_array>. Returned array should
+    be equal in length to input array
+    """
+    silent = librosa.effects.split(audio_array, top_db=th)
+    size = len(audio_array)
+    is_silent = np.zeros(size)
+    for i in silent:
+        is_silent[i[0]:i[1]] = 1
+    return is_silent
+def plot_silence(is_silent,audio_array):
+    plt.figure().set_figwidth(20)
+    samples =  [(x/44100)/60 for x in range(len(audio_array))]
+    plt.plot(samples,audio_array,zorder=0)
+    plt.xlabel('Time (minutes)')
+    plt.ylabel('Amplitude')
+    silent_samples = ((np.where(is_silent==0)[0])/44100)/60
+    plt.scatter(silent_samples,np.zeros(len(silent_samples)),color='red',zorder=1,s=0.1)
+    plt.show()
+
+def get_multitrack_songs():
+    trackIds = []
+    for i in saraga.track_ids:
+        if saraga.track(i).audio_vocal_path is not None:
+            trackIds.append(i)
+    return trackIds
+def get_windows(audio_array,window_sec):
+    w_samples = window_sec*44100
+
+    num_windows = ceil(len(audio_array)/w_samples)
+
+    windows = np.array_split(audio_array, num_windows) 
+    return windows
+def get_target(silence_windows,th=0.5):
+    num_windows = len(silence_windows)
+    target = np.zeros(num_windows)
+    for i,arr in enumerate(silence_windows):
+        ones = np.sum(arr==1)
+        perc= ones/len(arr)
+        if perc > th:
+            target[i] = 1
+    return target
+def append_dataframe(track_id,violin_target,voice_target,mridangam_target,df):
+    for i in range(len(violin_target)):
+        row = {
+            "track_id": track_id,
+            "window_index":i,
+            "is_violin": violin_target[i],
+            "is_voice": voice_target[i],
+            "is_mridangam": mridangam_target[i]
+        }
+        df = df.append(row,ignore_index=True)
+    return df
+def create_dataframe():
+    df = pd.DataFrame(columns=["track_id","window_index","is_violin","is_voice","is_mridangam"])
+    return df
