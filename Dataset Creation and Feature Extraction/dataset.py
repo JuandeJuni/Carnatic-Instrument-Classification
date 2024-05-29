@@ -163,23 +163,23 @@ def append_dataframe(track_id,violin_target,voice_target,mridangam_target,df):
 def create_dataframe():
     df = pd.DataFrame(columns=["track_id","window_index","is_violin","is_voice","is_mridangam"])
     return df
-def plot_instrument(audio_array,instrument_target):
-    samples_w = window_sec*44100
-    print(len(audio_array))
-    print(samples_w*len(instrument_target))
-    plt.figure().set_figwidth(20)
-    samples =  [(x/44100)/60 for x in range(len(audio_array))]
-    plt.plot(samples,audio_array,zorder=0)
-    plt.xlabel('Time (minutes)')
-    plt.ylabel('Amplitude')
-    # silent_samples = ((np.where(is_silent==0)[0])/44100)/60
-    # plt.scatter(silent_samples,np.zeros(len(silent_samples)),color='red',zorder=1,s=0.1)
-    # plt.show()
+# def plot_instrument(audio_array,instrument_target):
+#     samples_w = window_sec*44100
+#     print(len(audio_array))
+#     print(samples_w*len(instrument_target))
+#     plt.figure().set_figwidth(20)
+#     samples =  [(x/44100)/60 for x in range(len(audio_array))]
+#     plt.plot(samples,audio_array,zorder=0)
+#     plt.xlabel('Time (minutes)')
+#     plt.ylabel('Amplitude')
+#     # silent_samples = ((np.where(is_silent==0)[0])/44100)/60
+#     # plt.scatter(silent_samples,np.zeros(len(silent_samples)),color='red',zorder=1,s=0.1)
+#     # plt.show()
     
-    silent_samples_w = np.where(instrument_target==1)[0]
-    for i in range(len)):
+#     silent_samples_w = np.where(instrument_target==1)[0]
+#     for i in range(len)):
 
-        if instrument_target[i] == 1:
+#         if instrument_target[i] == 1:
             
 
   
