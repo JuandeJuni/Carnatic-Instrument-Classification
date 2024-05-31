@@ -31,4 +31,8 @@ import pandas as pd
 #     df.to_csv("dataset.csv",index=False)
 
 df = pd.read_csv("Dataset Creation and Feature Extraction\dataset.csv")
+dataset.init_dataset(r"C:\Users\w190973\OneDrive - Worldline SA\Escritorio\mtg\dataset")    
 feature.mfcc(df)
+feature.rmse(df)
+# feature.sc(df)
+feature.lpc(df)
