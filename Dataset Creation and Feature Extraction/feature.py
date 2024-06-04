@@ -106,3 +106,28 @@ def lpc(df,sr=44100):
     feature_dataframe = pd.concat(feature_list, ignore_index=True)
     print(feature_dataframe)
     return feature_dataframe
+
+def zcr (df,sr=44100):
+    tracks = df["track_id"].unique()
+    feature_list = []
+
+    for i in tracks:
+        
+        song_df = df[df["track_id"] == i].copy()
+        
+        mixed_audio = dataset.load_mixed_audio(i)
+        hop_length = dataset.window_sec*sr
+        zcr = librosa.feature.zero_crossing_rate(y=mixed_audio,frame_length= 2048, hop_length=hop_length,center=False)
+        zcr_df = pd.DataFrame(zcr.T, columns=["zcr"])
+        print(zcr_df)
+        zcr_df["track_id"] = i
+        zcr_df["window_index"] = range(len(zcr_df))
+        
+        merged_df = pd.merge(song_df, zcr_df, on=["track_id", "window_index"], how="outer")
+        
+        feature_list.append(merged_df)
+        break
+
+    feature_dataframe = pd.concat(feature_list, ignore_index=True)
+    print(feature_dataframe)
+    return feature_dataframe

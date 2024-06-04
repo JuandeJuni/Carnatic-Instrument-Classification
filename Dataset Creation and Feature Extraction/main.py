@@ -30,9 +30,10 @@ import pandas as pd
 
 #     df.to_csv("dataset.csv",index=False)
 
-df = pd.read_csv("Dataset Creation and Feature Extraction\dataset.csv")
-dataset.init_dataset(r"C:\Users\w190973\OneDrive - Worldline SA\Escritorio\mtg\dataset")    
+df = pd.read_csv("Carnatic-Instrument-Classification\Dataset Creation and Feature Extraction\dataset.csv")
+dataset.init_dataset(r"C:\Users\laiam\Desktop\UNI 4T\TallerMusical\data")    
 feature.mfcc(df)
 feature.rmse(df)
-# feature.sc(df)
+feature.sc(df)
 feature.lpc(df)
+feature.zcr(df)
