@@ -31,9 +31,16 @@ import pandas as pd
 #     df.to_csv("dataset.csv",index=False)
 
 df = pd.read_csv("Carnatic-Instrument-Classification\Dataset Creation and Feature Extraction\dataset.csv")
-dataset.init_dataset(r"C:\Users\laiam\Desktop\UNI 4T\TallerMusical\data")    
-feature.mfcc(df)
-feature.rmse(df)
-feature.sc(df)
-feature.lpc(df)
-feature.zcr(df)
+dataset.init_dataset(r"C:\Users\laiam\Desktop\UNI 4T\TallerMusical\data")
+
+ampenv = feature.ampenv(df)
+rmse = feature.rmse(df)
+zcr =feature.zcr(df)
+sc = feature.sc(df)
+mfcc = feature.mfcc(df)
+lpc = feature.lpc(df)
+
+features = [ampenv,rmse,zcr,sc,mfcc,lpc]
+df = feature.merge(df,features)
+print(df)
+df.to_csv("features.csv",index=False)
