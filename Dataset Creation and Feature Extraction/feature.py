@@ -5,16 +5,17 @@ import numpy as np
 
 
 
-def ampenv(df,sr=44100):
+def ampenv(df,sr=44100,audio_array=None):
     tracks = df["track_id"].unique()
     feature_list = []
 
     for i in tracks:
-        
         song_df = df[df["track_id"] == i].copy()
         
-        # print(song_df)
-        mixed_audio = dataset.load_mixed_audio(i)
+        if audio_array is None:
+            mixed_audio = dataset.load_mixed_audio(i)    
+        else:
+            mixed_audio = audio_array
         windows = dataset.get_windows(mixed_audio)
         ampenv_df = pd.DataFrame(columns=["ampenv"])
         for w in windows:
@@ -32,7 +33,7 @@ def ampenv(df,sr=44100):
     return feature_dataframe
 
 
-def rmse (df,sr=44100):
+def rmse (df,sr=44100,audio_array=None):
     tracks = df["track_id"].unique()
     feature_list = []
 
@@ -41,7 +42,10 @@ def rmse (df,sr=44100):
         song_df = df[df["track_id"] == i].copy()
         
         # print(song_df)
-        mixed_audio = dataset.load_mixed_audio(i)
+        if audio_array is None:
+            mixed_audio = dataset.load_mixed_audio(i)
+        else:
+            mixed_audio = audio_array
         hop_length = dataset.window_sec*sr
         rmse = librosa.feature.rms(y=mixed_audio,frame_length= 2048, hop_length=hop_length,center=False)
         rmse_df = pd.DataFrame(rmse.T, columns=["rmse"])
@@ -57,7 +61,7 @@ def rmse (df,sr=44100):
     return feature_dataframe
 
 
-def zcr (df,sr=44100):
+def zcr (df,sr=44100,audio_array=None):
     tracks = df["track_id"].unique()
     feature_list = []
 
@@ -65,7 +69,10 @@ def zcr (df,sr=44100):
         
         song_df = df[df["track_id"] == i].copy()
         
-        mixed_audio = dataset.load_mixed_audio(i)
+        if audio_array is None:
+            mixed_audio = dataset.load_mixed_audio(i)
+        else:
+            mixed_audio = audio_array
         hop_length = dataset.window_sec*sr
         zcr = librosa.feature.zero_crossing_rate(y=mixed_audio,frame_length= 2048, hop_length=hop_length,center=False)
         zcr_df = pd.DataFrame(zcr.T, columns=["zcr"])
@@ -81,7 +88,7 @@ def zcr (df,sr=44100):
     return feature_dataframe
 
 
-def sc(df,sr=44100):
+def sc(df,sr=44100,audio_array=None):
     tracks = df["track_id"].unique()
     feature_list = []
 
@@ -90,7 +97,10 @@ def sc(df,sr=44100):
         song_df = df[df["track_id"] == i].copy()
         
         # print(song_df)
-        mixed_audio = dataset.load_mixed_audio(i)
+        if audio_array is None:
+            mixed_audio = dataset.load_mixed_audio(i)
+        else:
+            mixed_audio = audio_array
         hop_length = dataset.window_sec*sr
         spectral_centroid = librosa.feature.spectral_centroid(y=mixed_audio,sr=sr,n_fft = 2048, hop_length=hop_length,center=False)
         spectral_centroid_df = pd.DataFrame(spectral_centroid.T, columns=["spectral_centroid"])
@@ -105,7 +115,7 @@ def sc(df,sr=44100):
     feature_dataframe = pd.concat(feature_list, ignore_index=True)
     return feature_dataframe
 
-def mfcc(df,sr=44100,n_mfcc=6):
+def mfcc(df,sr=44100,n_mfcc=6,audio_array=None):
     tracks = df["track_id"].unique()
     feature_list = []
 
@@ -114,7 +124,10 @@ def mfcc(df,sr=44100,n_mfcc=6):
         song_df = df[df["track_id"] == i].copy()
         
         # print(song_df)
-        mixed_audio = dataset.load_mixed_audio(i)
+        if audio_array is None:
+            mixed_audio = dataset.load_mixed_audio(i)
+        else:
+            mixed_audio = audio_array
         hop_length = dataset.window_sec*sr
         mfcc = librosa.feature.mfcc(y=mixed_audio,sr=sr,n_mfcc=n_mfcc,hop_length=hop_length,center=False)
         mfcc_df = pd.DataFrame(mfcc.T, columns=[f"mfcc_{c}" for c in range(n_mfcc)])
@@ -130,7 +143,7 @@ def mfcc(df,sr=44100,n_mfcc=6):
     return feature_dataframe
 
 
-def lpc(df,sr=44100):
+def lpc(df,sr=44100,audio_array=None):
     tracks = df["track_id"].unique()
     feature_list = []
 
@@ -139,7 +152,10 @@ def lpc(df,sr=44100):
         song_df = df[df["track_id"] == i].copy()
         
         # print(song_df)
-        mixed_audio = dataset.load_mixed_audio(i)
+        if audio_array is None:
+            mixed_audio = dataset.load_mixed_audio(i)    
+        else:
+            mixed_audio = audio_array
         windows = dataset.get_windows(mixed_audio)
         lpc_df = pd.DataFrame(columns=[f"lpc_{c}" for c in range(6)])
         for w in windows:

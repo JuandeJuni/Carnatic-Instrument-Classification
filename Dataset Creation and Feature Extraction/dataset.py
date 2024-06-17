@@ -163,6 +163,15 @@ def append_dataframe(track_id,violin_target,voice_target,mridangam_target,df):
 def create_dataframe():
     df = pd.DataFrame(columns=["track_id","window_index","is_violin","is_voice","is_mridangam"])
     return df
+def append_windows(track_id,windows,df):
+    for i in range(len(windows)):
+        row = {
+            "track_id": track_id,
+            "window_index":i,
+        }
+        df = df.append(row,ignore_index=True)
+    return df
+
 # def plot_instrument(audio_array,instrument_target):
 #     samples_w = window_sec*44100
 #     print(len(audio_array))
