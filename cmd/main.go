@@ -76,17 +76,16 @@ func HandleGenerateJSONAndCallPythonScript(w http.ResponseWriter, r *http.Reques
 }
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
-
 	if r.Method != "POST" {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
 	}
 
-	// Parse the multipart form
-	err := r.ParseMultipartForm(20 << 20) // 10 MB limit
+	// Parse the multipart form, limiting the size to 20 MB
+	err := r.ParseMultipartForm(50 << 20)
 	if err != nil {
 		http.Error(w, "Failed to parse form", http.StatusBadRequest)
-		fmt.Print(err)
+		fmt.Println("Error parsing form:", err)
 		return
 	}
 
@@ -94,14 +93,22 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	file, _, err := r.FormFile("file")
 	if err != nil {
 		http.Error(w, "Failed to retrieve file", http.StatusBadRequest)
-		fmt.Println(err)
+		fmt.Println("Error retrieving file:", err)
 		return
 	}
 	defer file.Close()
-	// Create the destination file with the name inputAudio.wav in the root directory
-	dst, err := os.Create("./inputAudio.mp3")
+
+	// Get the storage path from an environment variable
+	storagePath := os.Getenv("STORAGE_PATH")
+	if storagePath == "" {
+		storagePath = "./" // default to current directory
+	}
+
+	// Create the destination file
+	dst, err := os.Create(filepath.Join(storagePath, "inputAudio.mp3"))
 	if err != nil {
 		http.Error(w, "Failed to create file", http.StatusInternalServerError)
+		fmt.Println("Error creating file:", err)
 		return
 	}
 	defer dst.Close()
@@ -109,9 +116,40 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	// Copy the uploaded file to the destination
 	if _, err := io.Copy(dst, file); err != nil {
 		http.Error(w, "Failed to save file", http.StatusInternalServerError)
+		fmt.Println("Error saving file:", err)
 		return
 	}
 	fmt.Fprintf(w, "File uploaded successfully: inputAudio.mp3")
+
+	cmd := exec.Command("python3", "lib/script2.py", "inputAudio.mp3")
+	err = cmd.Run() // Run the command without capturing output
+	if err != nil {
+		http.Error(w, "Error calling Python script: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response := fmt.Sprintf(`
+		<div id="output-content" class="text-center">
+			<div class="audio-container">
+					<audio controls>
+						<source src=../inputAudio.mp3" type="audio/mpeg">
+						Your browser does not support the audio element.
+					</audio>
+            </div>
+			<a href="./output.html" target="_blank" rel="noopener noreferrer">
+				<img id="output-image" src="./output.png?t=%d" alt="Intervals" class="img-fluid">
+			</a>
+			<img id="sound-wave" src="./sound_wave.png?t=%d" alt="sound_wave" class="img-fluid">
+			<div class="center-button">
+				<div class="center-button">
+                <a id="download-btn" href="./output.png" download="output.png" class="btn btn-secondary mt-3">Download Graph</a>
+                <a id="download-btn" href="./output.html" download="output.html" class="btn btn-secondary mt-3">Download Interactive Graph</a>
+                <a id="download-btn" href="./sound_wave.png" download="sound-wave.png" class="btn btn-secondary mt-3">Download Sound wave</a>
+            </div>
+			</div>
+		</div>`, time.Now().Unix(), time.Now().Unix())
+
+	fmt.Fprint(w, response)
 }
 
 // generateRandomBoolArray generates an array of random boolean values

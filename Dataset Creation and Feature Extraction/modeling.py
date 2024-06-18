@@ -4,7 +4,7 @@ import feature
 import numpy as np
 import dataset
 def importModels(instrument):
-    with open(f"Models/{instrument}.pkl", 'rb') as handle:
+    with open(f"Dataset Creation and Feature Extraction/Models/{instrument}.pkl", 'rb') as handle:
         model = pickle.load(handle)
     return model
 

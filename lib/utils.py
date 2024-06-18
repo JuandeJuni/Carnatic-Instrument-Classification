@@ -7,7 +7,17 @@ import plotly.graph_objects as go
 
 instrument_names = ['Voice', 'Violin', 'Mridangam', 'Ghatam']
 
-def parse_json_file(file_name: str):
+def convert_ndarray_to_list(obj):
+    if isinstance(obj, dict):
+        return {k: convert_ndarray_to_list(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_ndarray_to_list(i) for i in obj]
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    else:
+        return obj
+
+def parse_json_file(file_name="input.json"):
     file_path = "data/" + file_name
     # Open and read the JSON file
     with open(file_path, 'r') as file:
@@ -17,7 +27,6 @@ def parse_json_file(file_name: str):
     is_voice = data['is_voice']
     is_violin = data['is_violin']
     is_mridangam = data['is_mridangam']
-    is_ghatam = data['is_ghatam']
     
     # Determine the number of intervals (assuming all arrays have the same length)
     num_intervals = len(is_voice)
@@ -29,22 +38,8 @@ def parse_json_file(file_name: str):
     intervals_matrix[0] = is_voice
     intervals_matrix[1] = is_violin
     intervals_matrix[2] = is_mridangam
-    intervals_matrix[3] = is_ghatam
     
     return intervals_matrix
-
-def plot_audio_from_json(json_file, save_name):
-    with open(json_file, 'r') as file:
-        data = json.load(file)
-
-    audio_array = data['audio_array']
-
-    x = list(range(len(audio_array)))
-    y = audio_array
-
-    plt.plot(x,y)
-    plt.savefig(save_name, format='html')
-    plt.close()
 
 def save_boolean_matrix(bool_matrix, save_name="output.png"):
     n, m = bool_matrix.shape
@@ -61,7 +56,7 @@ def save_boolean_matrix(bool_matrix, save_name="output.png"):
     # Create the plot
     plt.imshow(matrix_with_spacing, cmap=cmap, interpolation='nearest', aspect='auto')
     
-    timestep = 0.1  # assuming timestep is 0.1 seconds
+    timestep = 1  # assuming timestep is 0.1 seconds
     total_time_seconds = m * timestep
     total_time_minutes = total_time_seconds / 60
 
@@ -91,7 +86,7 @@ def save_boolean_matrix(bool_matrix, save_name="output.png"):
     plt.savefig("public/" + save_name)
     plt.close()
 
-def save_boolean_matrix_interactive(bool_matrix, save_name="output.html"):
+def save_boolean_matrix_interactive(bool_matrix, save_name="output.html", timestep=1):
     n, m = bool_matrix.shape
     # Create a new matrix with spacing between the original matrix rows
     matrix_with_spacing = np.zeros((n*2, m), dtype=int)
@@ -117,16 +112,13 @@ def save_boolean_matrix_interactive(bool_matrix, save_name="output.html"):
         zmax=n
     ))
 
-    # Calculate the x-ticks for every minute
-    timestep = 0.1  # assuming timestep is 0.1 seconds
-    total_time_seconds = m * timestep
-    total_time_minutes = total_time_seconds / 60
-
-    xt = np.arange(0, m, 60 / timestep)
-    x = xt * timestep / 60  # convert ticks to minutes
+    # Calculate the x-ticks for every 10 seconds
+    seconds_per_tick = 10
+    xt = np.arange(0, m, seconds_per_tick / timestep)
+    x = xt * timestep  # convert ticks to seconds
 
     # Generate time labels in 'minute:second' format
-    t = pd.to_datetime(x, unit='m')
+    t = pd.to_datetime(x, unit='s')
     t_format = [f'{time.minute}:{time.second:02d}' for time in t]
 
     # Set the layout
@@ -154,26 +146,36 @@ def save_boolean_matrix_interactive(bool_matrix, save_name="output.html"):
     # Save the plot to an HTML file
     fig.write_html("public/" + save_name)
 
-def generate_waveform(file_name, save_name="output.html"):
+def generate_waveform(file_name="input.json", save_name="sound_wave.png"):
     # Load JSON data
     file_path = "data/" + file_name
-    # Open and read the JSON file
     with open(file_path, 'r') as file:
         data = json.load(file)
 
-    # Extract amplitude values
+    # Extract amplitude values and sample rate
     amplitudes = data["audio_array"]
+    sample_rate = data["sr"]
+    total_samples = len(amplitudes)
+    total_time_seconds = total_samples / sample_rate
 
-    # Create a time axis based on the number of amplitude samples
-    time = np.linspace(0, len(amplitudes), num=len(amplitudes))
+    # Create a time axis based on the sample rate and number of amplitude samples
+    time_axis = np.linspace(0, total_time_seconds, total_samples)
+
+    # Calculate the x-ticks for every minute
+    xt = np.arange(0, total_time_seconds, 60)
+    
+    # Generate time labels in 'minute:second' format
+    t_format = [f'{int(t // 60)}:{int(t % 60):02d}' for t in xt]
 
     # Plot the sound wave
     plt.figure(figsize=(10, 4))
-    plt.plot(time, amplitudes)
-    plt.xlabel('Time')
+    plt.plot(time_axis, amplitudes)
+    plt.xticks(xt, t_format)
+    plt.xlabel('Time (minutes:seconds)')
     plt.ylabel('Amplitude')
     plt.title('Sound Wave Visualization')
-    plt.legend()
     plt.grid(True)
-    plt.savefig('public/sound_wave.png')  # Save the plot as an image file
+    
+    # Save the plot as an image file
+    plt.savefig('public/' + save_name)
     plt.close()  # Close the plot to free up memory

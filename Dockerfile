@@ -9,17 +9,18 @@ RUN go mod tidy
 # Copy the rest of the application code
 COPY . .
 
-# Install necessary tools for Python
-RUN apt-get update && apt-get install -y python3-venv
+# Install necessary tools for Python and create a virtual environment
+RUN apt-get update && apt-get install -y python3-venv python3-dev build-essential && \
+    python3 -m venv /opt/venv && \
+    /opt/venv/bin/pip install --upgrade pip
 
-# Create and activate virtual environment
-RUN python3 -m venv /opt/venv
+# Set the PATH to use the virtual environment
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Install Python dependencies
-RUN pip install --upgrade pip
-# RUN /opt/venv/bin/pip install -r dataset-creation-and-feature-extraction/requirements.txt
-RUN pip install -r lib/requirements.txt
+COPY lib/requirements.txt /app/lib/requirements.txt
+
+RUN /opt/venv/bin/pip install -r /app/lib/requirements.txt
 
 # Build the Go application
 RUN go build -o bin/main cmd/main.go
