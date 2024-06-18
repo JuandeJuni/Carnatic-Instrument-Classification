@@ -1,0 +1,9 @@
+numpy
+matplotlib
+plotly
+librosa==0.8.0
+spleeter
+mirdata
+smart_open
+scikit-learn
+cython==0.29.34
