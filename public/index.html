@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carnatic Music Instrument Classification</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <style>
+        .center-button {
+            display: flex;
+            justify-content: center;
+        }
+        .audio-container {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Carnatic Music Instrument Classification</h1>
+        <div class="text-center subtitle">Adrià León, Jinsong Liu, Laia Marinel·lo, Juande Gutiérrez and Raquel Maldonado</div>
+
+        <div id="output-content" class="text-center">
+            <div class="audio-container">
+                <audio controls>
+                    <source src="./precomputed/Koti Janmani.mp3.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+            <a href="./precomputed/output.html" target="_blank" rel="noopener noreferrer">
+                <img id="output-image" src="./precomputed/output.png" alt="Intervals" class="img-fluid">
+            </a>
+            <img id="sound-wave" src="./precomputed/sound_wave.png" alt="sound_wave" class="img-fluid">
+            <div class="center-button">
+                <a id="download-btn" href="./precomputed/Koti Janmani.mp3.mp3" download="output.mp3" class="btn btn-secondary mt-3">Download Song</a>
+                <a id="download-btn" href="./precomputed/output.png" download="output.png" class="btn btn-secondary mt-3">Download Graph</a>
+                <a id="download-btn" href="./precomputed/output.html" download="output.html" class="btn btn-secondary mt-3">Download Interactive Graph</a>
+                <a id="download-btn" href="./precomputed/sound_wave.png" download="sound_wave.png" class="btn btn-secondary mt-3">Download Sound wave</a>
+            </div>
+        </div>
+
+        <div class="center-button">
+            <!-- Modified button to trigger both Go function and Python script -->
+            <button id="generate-btn" hx-post="/generate-json" hx-trigger="click" hx-target="#output-content" hx-swap="outerHTML" class="btn btn-primary mt-3">Generate Image</button>
+        </div>
+
+        <div class="container mt-5 p-4">
+            <h1 class="mb-4">Upload File</h1>
+            <form id="uploadForm" hx-post="/upload" hx-swap="outerHTML" enctype="multipart/form-data" class="form-inline">
+                <div class="form-group mr-2">
+                    <input type="file" name="file" required class="form-control-file">
+                </div>
+                <button type="submit" class="btn btn-primary">Upload</button>
+            </form>
+        </div>
+    </div>
+    
+</body>
+</html>
